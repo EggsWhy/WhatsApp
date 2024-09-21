@@ -21,7 +21,7 @@ def fetch_data(dataframe, user):
     num_words = []
     for message in dataframe['message']:
         
-        if message.startswith('https') or message.startswith('<Media omitted> '):
+        if message.startswith('https') or message.startswith('<Media omitted>'):
             continue
         
         else:
