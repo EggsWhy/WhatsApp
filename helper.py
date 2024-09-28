@@ -119,9 +119,10 @@ def fetch_emoji_graph(dataframe, user):
     return emoji_df
 
 
-def fetch_trend_data(dataframe):
-    
-    dataframe['month_num'] = dataframe['date'].dt.month
+def fetch_trend_data(dataframe, user):
+    if user != 'Everyone':
+        dataframe = dataframe[dataframe['user'] == user] 
+
     timeline = dataframe.groupby(['year', 'month_num', 'month'])['message'].count().reset_index()
     time = []
 
@@ -129,5 +130,27 @@ def fetch_trend_data(dataframe):
         time.append(f"{timeline['month_num'][i]}-{timeline['year'][i]}")
         
     timeline['time'] = time
+
+    month_order = ['January', 'February', 'March', 'April', 'May', 
+                'June', 'July', 'August', 'September', 'October', 
+                'November', 'December']
+
+    day_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+
+    month_df = dataframe.groupby(['month'])['message'].count().reset_index()
+    month_df['month'] = pd.Categorical(month_df['month'], categories=month_order, ordered=True)
+    month_df = month_df.sort_values('month')
+
+    day_df = dataframe.groupby(['day'])['message'].count().reset_index()
+    day_df['day'] = pd.Categorical(day_df['day'], categories=day_order, ordered=True)
+    day_df = day_df.sort_values('day')
+
         
-    return timeline
+    return timeline, month_df, day_df
+
+
+def fetch_activity_data(dataframe):
+    
+   
+    
+    return dataframe

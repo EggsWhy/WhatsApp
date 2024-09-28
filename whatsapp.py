@@ -61,7 +61,9 @@ if uploaded_file is not None:
         data = bytes_data.decode('utf-8')        
         
         df = data_transform.transform(data)
-
+        
+        
+    #* Test out dataframe here
         
     # Unique users dropdown
     user_list = df['user'].unique().tolist()
@@ -146,25 +148,37 @@ if uploaded_file is not None:
         # Emoji
         st.header('Top 10 Most used Emojis')
         
-        emoji_df = helper.fetch_emoji_graph(df,user_selected)
+        emoji_df = helper.fetch_emoji_graph(df, user_selected)
         st.bar_chart(data=emoji_df, x='Emoji', y='Count')
+        
         
         
         # Activity Trend
         st.header('Messaging activity trend')
+        st.write('Based off every month')
         
-        trend_df = helper.fetch_trend_data(df)
+        trend_df, month_df, day_df = helper.fetch_trend_data(df, user_selected)
         fig = px.line(trend_df, x='time', y='message')
 
         st.plotly_chart(fig)
         
-        # User Activity Trend
-        st.header('User messaging activity trend')
+        # Monthly Activity Trend
+        st.header('Monthly activity trend')
+        st.write('Which month are you most active?')
         
+        fig = px.line(month_df, x='month', y='message')
+        st.plotly_chart(fig)
         
-            
+        # Monthly Activity Trend
+        st.header('Daily activity trend')
+        st.write('Which day of the week are you most active?')
+        
+        fig = px.line(day_df, x='day', y='message')
+        st.plotly_chart(fig)
+
         
         st.title('To be continued...')
+        st.write('Pls recommend ideas')
         
         
                     

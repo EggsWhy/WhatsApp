@@ -19,8 +19,8 @@ def transform(data):
     
     # Converting Date Format
     if 'AM' in dates[0].upper() or 'PM' in dates[0].upper():
-            # Convert using 12-hour format
-            df['message_date'] = pd.to_datetime(df['message_date'], format="%d/%m/%Y, %I:%M %p - ", errors='coerce')
+        # Convert using 12-hour format
+        df['message_date'] = pd.to_datetime(df['message_date'], format="%d/%m/%Y, %I:%M %p - ", errors='coerce')
             
     else:
         # Convert using 24-hour format
@@ -35,6 +35,7 @@ def transform(data):
 
     for message in df['user_message']:
         
+        # This splits the message into (user) and (message)
         entry = re.split(r'([\w\W]+?):\s', message)
             
         if entry[1:]: # Basically if length more than 1
@@ -45,6 +46,7 @@ def transform(data):
             users.append('whatsapp notifcation')
             messages.append(entry[0])
         
+        
     df['user'] = users
     df['message'] = messages
     df = df.drop('user_message', axis=1)
@@ -53,7 +55,9 @@ def transform(data):
     # Adding datetime columns
     df['year'] = df['date'].dt.year
     df['month'] = df['date'].dt.month_name()
-    df['day'] = df['date'].dt.day
+    df['month_num'] = df['date'].dt.month
+    df['day'] = df['date'].dt.day_name()
+    df['day_num'] = df['date'].dt.day
     df['hour'] = df['date'].dt.hour
     df['minute'] = df['date'].dt.minute
     
