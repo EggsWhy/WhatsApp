@@ -103,16 +103,16 @@ if uploaded_file is not None:
             st.header('Top 5 Most Active Users')
             st.write('This is based off of messages sent')
             
-            graph_data, graph_data_all, x_values, y_values = helper.fetch_active_user_graph(df)
+            graph_data, graph_data_all, x_values, y_values, top5 = helper.fetch_active_user_graph(df)
             graph_data = pd.DataFrame(graph_data)
             
             st.bar_chart(data=graph_data, x=None, y=None, y_label='Number of Messsages')
-        
+            
             # Most Characters typed
             st.header('Top 5 Most Characters typed')
             st.write('This is based off of characters typed')
             
-            characters_data = helper.fetch_characters(df)   
+            characters_data = helper.fetch_characters(df)
             st.bar_chart(data=characters_data, x='user', x_label='Name' , y='message', y_label='Total Characters') 
             
             # Piechart showing message distrubtion
@@ -121,6 +121,13 @@ if uploaded_file is not None:
             fig = px.pie(graph_data_all, names=x_values, values=y_values)
             st.plotly_chart(fig)
         
+        
+        graph_data, graph_data_all, x_values, y_values, top5 = helper.fetch_active_user_graph(df)
+        # Top 5 most active days (day, month, year)
+        st.header('Top 5 Most Active Days')
+        st.write('This is based off of messages sent')
+        
+        st.bar_chart(data=top5, x='date', x_label='Date', y='message', y_label='Number of Messsages', color='year')
         
         # WordCloud
         st.header('Most used words')
@@ -148,10 +155,12 @@ if uploaded_file is not None:
         # Emoji
         st.header('Top 10 Most used Emojis')
         
-        emoji_df = helper.fetch_emoji_graph(df, user_selected)
-        st.bar_chart(data=emoji_df, x='Emoji', y='Count')
-        
-        
+        try:
+            emoji_df = helper.fetch_emoji_graph(df, user_selected)
+            st.bar_chart(data=emoji_df, x='Emoji', y='Count')
+            
+        except Exception:
+            st.write('Looks like there is not any emojis sent or something has gone wrong with the system')
         
         # Activity Trend
         st.header('Messaging activity trend')
@@ -169,11 +178,24 @@ if uploaded_file is not None:
         fig = px.line(month_df, x='month', y='message')
         st.plotly_chart(fig)
         
-        # Monthly Activity Trend
+        # Daily Activity Trend
         st.header('Daily activity trend')
         st.write('Which day of the week are you most active?')
         
         fig = px.line(day_df, x='day', y='message')
+        st.plotly_chart(fig)
+
+
+        # Hourly Activity Trend
+        st.header('Hourly activity trend')
+        st.write('Which time of the day are you most active?')
+        
+        hour_df = helper.fetch_hourly_data(df, user_selected)
+        
+        fig = px.line_polar(hour_df, r='message', theta='hours_full', line_close=True, hover_name=hour_df['message'].astype(str))
+        fig.update_traces(fill='toself')
+        # fig.update_traces(hoverinfo='text', text=hour_df['message'].astype(str))
+        fig.update_layout(height=600, width=800)
         st.plotly_chart(fig)
 
         

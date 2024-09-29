@@ -45,13 +45,18 @@ def fetch_data(dataframe, user):
         
         
 def fetch_active_user_graph(dataframe):
-    people = dataframe['user'].value_counts().head()
+    people = dataframe['user'].value_counts().head() #*can actually just reset index here*#
     x = dataframe['user'].value_counts()
     
     index = x.index
     values = x.values
     
-    return people, x, index, values
+    top = dataframe.groupby(['year', 'month', 'day_num'])['message'].count().reset_index()
+    top['year'] = top['year'].astype(str)
+    top['date'] = top['day_num'].astype(str)+'-'+top['month']+'-'+top['year'].astype(str)
+    top5 = top.sort_values(by='message', ascending=False).head()
+    
+    return people, x, index, values, top5
 
 
 def fetch_characters(dataframe):
@@ -127,7 +132,7 @@ def fetch_trend_data(dataframe, user):
     time = []
 
     for i in range(timeline.shape[0]):
-        time.append(f"{timeline['month_num'][i]}-{timeline['year'][i]}")
+        time.append(f"{timeline['month_num'][i]}-{timeline['year'][i]}") # This is absolutely useless can replace with better
         
     timeline['time'] = time
 
@@ -149,8 +154,14 @@ def fetch_trend_data(dataframe, user):
     return timeline, month_df, day_df
 
 
-def fetch_activity_data(dataframe):
-    
-   
-    
-    return dataframe
+def fetch_hourly_data(dataframe, user):
+    if user != 'Everyone':
+        dataframe = dataframe[dataframe['user'] == user] 
+        
+    hours_full = pd.DataFrame({'hours_full': range(1,25)})
+    hours_new = hours_full.merge(dataframe.groupby(['hour'])['message'].count().reset_index(), left_on='hours_full', right_on='hour', how='left').fillna(0)
+    hours_new = hours_new.drop('hour', axis=1)
+    hours_new['message'] = hours_new['message'].astype(int)
+    hours_new['hours_full'] = hours_new['hours_full'].astype(str)+'h'
+
+    return hours_new
